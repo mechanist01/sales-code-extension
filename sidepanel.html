@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>vauxly</h1>
+  </header>
+  <div class="container">
+    <div id="controls">
+      <select id="tabSelect">
+        <option value="">Select a tab to analyze</option>
+      </select>
+      <!-- Add the microphone dropdown here -->
+      <select id="micSelect" style="display: none;">
+        <option value="">Select a microphone</option>
+      </select>
+      <div class="button-group">
+        <button id="startRecording">Start</button>
+        <button id="stopRecording" disabled>Stop</button>
+      </div>
+      <button id="resetEmotions" style="display: none;">Reset Emotions</button>
+      <div id="status"></div>
+      <div id="recordingStatus">
+        <div id="volumeBar"><div id="volumeBarFill"></div></div>
+        <div id="micIcon"></div>
+      </div>
+      <div id="websocketStatus">
+        <div id="websocketIndicator"></div>
+        <span id="websocketStatusText"></span>
+      </div>
+    </div>
+    <!-- Add the sentiment bar container here -->
+    <div class="dialogue-container">
+      <h3 class="section-title">Customer Notes</h3>
+      <div id="dialogueBox" class="dialogue-box"></div>
+      <!-- Add the Upload button here -->
+      <button id="uploadButton" style="width: 100%; margin-top: 10px;" disabled>Upload</button>
+
+      <!-- Add the volume meter container here -->
+      <div id="volumeMeterContainer" style="margin-top: 10px;">
+        <div id="volumeMeter" style="height: 20px; background-color: #ccc; border-radius: 5px; overflow: hidden;">
+          <div id="volumeMeterFill" style="height: 100%; width: 0%; background-color: #3498db;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="sidepanel.js"></script>
+  <script type="module" src="uploadMain.js"></script>
+</body>
+</html>

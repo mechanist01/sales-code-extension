@@ -1,0 +1,47 @@
+{
+    "manifest_version": 3,
+    "name": "vauxly",
+    "version": "1.0",
+    "description": "transcribe and save calls and virtual meetings",
+    "permissions": [
+        "tabCapture",
+        "activeTab",
+        "storage",
+        "sidePanel",
+        "tabs",
+        "audioCapture",
+        "contentSettings",
+        "microphone",
+        "offscreen",
+        "scripting"
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": ["requestPermissions.html", "requestPermissions.js"],
+            "matches": ["<all_urls>"]
+        },
+        {
+            "resources": ["offscreen.html"],
+            "matches": ["<all_urls>"]
+        }
+    ],
+    "side_panel": {
+        "default_path": "sidepanel.html"
+    },
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "action": {},
+    "icons": {
+        "16": "icon16.png",
+        "48": "icon48.png",
+        "128": "icon128.png"
+    },
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'"
+    }
+}

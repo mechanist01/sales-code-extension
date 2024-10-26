@@ -1,0 +1,214 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;700&display=swap');
+
+body {
+  background-image: url('bg.png');
+  background-size: stretch; /* Ensures the image covers the entire background */
+  background-position: center; /* Centers the image */
+  color: #ffffff; /* White text for contrast */
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+  color: #ffffff; /* White text */
+}
+
+h1 {
+  font-size: 44px;
+  font-family: 'Roboto', sans-serif;
+  color: #ffffff; /* White text */
+  margin-bottom: 20px;
+  text-align: center; /* Center align the text */
+}
+
+select, button {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #4a5568; /* Light gray border */
+  border-radius: 5px;
+  background-color: #2d3748; /* Dark blue */
+  color: #ffffff; /* White text */
+  font-size: 14px;
+}
+
+button {
+  background-color: #0f9c32; /* bg-blue-600 */
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #096e22; /* hover:bg-blue-700 */
+}
+
+button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0px;
+}
+
+.button-group button {
+  width: 48%;
+}
+
+.divider {
+  height: 2px;
+  background-color: #1a6aa0;
+  margin: 20px 0;
+}
+
+
+.recording #volumeBar, .connected #websocketStatus {
+  display: block;
+}
+
+
+.app-header {
+  display: flex;
+  align-items: left;
+  padding: 10px;
+  color: #ffffff; /* White text */
+}
+
+.app-icon {
+  width: 189px;
+  height: 40px;
+  margin-right: 10px;
+  background-image: url('vauxly.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.button {
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px #12a059;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px #094268ea;
+}
+
+
+.dialogue-container {
+  flex: 0 0 160px;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.dialogue-box {
+  height: 400px;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  border: 1px solid #ccc;
+  padding: 10px;
+  font-size: 14px;
+  line-height: 1.4;
+  background-color: #ffffff; /* White background */
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: #000000; /* Black text */
+}
+
+.dialogue-box::-webkit-scrollbar {
+  display: none;
+}
+
+.section-title {
+  margin: 0 0 0 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff; /* White text */
+  text-align: left;
+}
+
+.dialogue-actions {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.dialogue-box h3 {
+  margin-top: 0;
+  color: #000000; /* Black text */
+}
+
+.dialogue-box hr {
+  margin: 20px 0;
+  border: none;
+  border-top: 1px solid #e0e0e0;
+}
+
+.dialogue-box p {
+  margin-bottom: 10px;
+}
+
+.dialogue-box .summary {
+  background-color: #f0f8ff;
+  border-left: 3px solid #3498db;
+  padding: 10px;
+  margin: 15px 0;
+}
+
+.dialogue-box ul {
+  padding-left: 20px;
+}
+
+#sentimentLineContainer {
+  position: relative;
+  width: 100%;
+  height: 20px;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+#resetButton {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+#resetButton:hover {
+  color: #ddd;
+}
+
+#uploadButton:disabled {
+  background-color: #d3d3d3; /* Light gray */
+  cursor: not-allowed;
+}
+
+.dialogue-box .message-bubble {
+  background-color: #e0f7fa; /* Light cyan background for message bubbles */
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px 0;
+  border-left: 4px solid #4a5568; /* Teal border for distinction */
+  color: #000000; /* Dark teal text */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px; /* Add space between bubbles */
+}
