@@ -433,7 +433,6 @@ button:disabled {
 #volumeMeter {
   height: 20px;
   background-color: #2d3748;
-  border-radius: 5px;
   overflow: hidden;
 }
 
