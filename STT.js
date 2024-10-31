@@ -60,7 +60,7 @@ export class SpeechToText {
                     this.wordsMerger.processApiResponse(message);
                     
                     if (this.onTranscriptReceived) {
-                        this.onTranscriptReceived(message);
+                        this.onTranscriptReceived(message.text);
                     }
                 }
             };
@@ -157,6 +157,8 @@ export class SpeechToText {
                 this.socket.send(JSON.stringify({ "terminate_session": true }));
                 this.socket.close();
                 console.log('WebSocket close initiated.');
+            } else if (this.socket.readyState === WebSocket.CLOSING || this.socket.readyState === WebSocket.CLOSED) {
+                console.log('WebSocket is already closing or closed.');
             } else {
                 console.log('WebSocket is not open, current state:', this.socket.readyState);
             }

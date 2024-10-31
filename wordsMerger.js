@@ -1,5 +1,3 @@
-import { summarizeNotes } from './summarizer.js'; // Add this import statement
-
 export class WordsMerger {
     constructor(dialogueBoxId) {
         this.dialogueBoxId = dialogueBoxId;
@@ -7,11 +5,13 @@ export class WordsMerger {
         if (!this.dialogueBox) {
             this.createDialogueBox();
         }
-        this.currentSentence = '';
-        this.partialText = '';
-        this.lastPartialTime = null;
-        this.emptyPartialCount = 0;
-        this.dialogueBoxInstance = null; // Will be set from outside
+        this.currentText = '';
+        this.lastPartialText = '';
+        this.dialogueBoxInstance = null;
+        this.emptyResponseCount = 0;
+        this.bubbles = [];
+        this.currentBubbleText = '';
+        this.EMPTY_THRESHOLD = 4; // Changed to 4 empty responses
     }
 
     createDialogueBox() {
@@ -21,61 +21,85 @@ export class WordsMerger {
         document.body.appendChild(this.dialogueBox);
     }
 
-    async processApiResponse(response) {
+    processApiResponse(response) {
+        if (!response || !response.message_type) return;
+
         if (response.message_type === 'PartialTranscript') {
-            if (response.text === '') {
-                this.emptyPartialCount++;
-                if (this.emptyPartialCount >= 3) {
-                    await this.createTextBubble();
-                    this.emptyPartialCount = 0;
+            if (!response.text || response.text.trim() === '') {
+                this.emptyResponseCount++;
+                if (this.emptyResponseCount >= this.EMPTY_THRESHOLD && this.currentBubbleText.trim()) {
+                    // Only create a new bubble if we have accumulated text
+                    this.bubbles.push(this.currentBubbleText.trim());
+                    this.currentBubbleText = '';
+                    this.currentText = '';
+                    this.lastPartialText = '';
+                    this.emptyResponseCount = 0;
                 }
             } else {
-                this.emptyPartialCount = 0;
-                this.partialText = response.text;
+                // Reset empty count and update current text
+                this.emptyResponseCount = 0;
+                this.lastPartialText = response.text;
+                this.currentText = response.text;
             }
-            this.lastPartialTime = new Date(response.created).getTime();
+            this.updateDialogueBox();
         } else if (response.message_type === 'FinalTranscript') {
-            this.currentSentence += response.text + ' ';
-            this.partialText = '';
-            this.emptyPartialCount = 0;
-        }
-        this.updateDialogueBox();
-    }
-
-    async createTextBubble() {
-        if (this.currentSentence.trim()) {
-            const originalText = this.currentSentence.trim();
-            this.currentSentence = ''; // Clear the current sentence immediately
-
-            console.log('Sending text to summarizer:', originalText); // Log the text being sent
-
-            try {
-                const summary = await summarizeNotes(originalText);
-                console.log('Received summary:', summary); // Log the received summary
-                // Update the dialogue box with the summary only
-                this.dialogueBoxInstance.updateDialogueBox(summary, false, true, true);
-            } catch (error) {
-                console.error('Error summarizing text bubble:', error);
+            if (response.text && response.text.trim()) {
+                // Add the final text to the current bubble text
+                const finalText = response.text.trim();
+                if (!this.currentBubbleText.includes(finalText)) {
+                    if (this.currentBubbleText) {
+                        this.currentBubbleText += ' ' + finalText;
+                    } else {
+                        this.currentBubbleText = finalText;
+                    }
+                }
+                this.currentText = '';
             }
+            this.emptyResponseCount = 0;
+            this.updateDialogueBox();
         }
     }
 
     updateDialogueBox() {
-        const displayText = this.currentSentence + this.partialText;
-        if (displayText.trim()) {
-            this.dialogueBoxInstance.updateCurrentText(displayText);
+        if (this.dialogueBoxInstance) {
+            // Clear the dialogue box
+            this.dialogueBoxInstance.clearDialogue();
+
+            // Display all completed bubbles
+            this.bubbles.forEach((bubble, index) => {
+                this.dialogueBoxInstance.updateDialogueBox(bubble, true, index > 0);
+            });
+
+            // Display current bubble text plus any partial text
+            let displayText = this.currentBubbleText;
+            if (this.currentText && !displayText.endsWith(this.currentText)) {
+                displayText = displayText ? `${displayText} ${this.currentText}` : this.currentText;
+            }
+
+            if (displayText.trim()) {
+                this.dialogueBoxInstance.updateDialogueBox(
+                    displayText,
+                    true,
+                    this.bubbles.length > 0,
+                    Boolean(this.currentText)
+                );
+            }
         }
     }
 
     reset() {
-        this.currentSentence = '';
-        this.partialText = '';
-        this.emptyPartialCount = 0;
+        this.currentText = '';
+        this.lastPartialText = '';
+        this.emptyResponseCount = 0;
+        this.bubbles = [];
+        this.currentBubbleText = '';
     }
 
     clearDialogue() {
         this.reset();
-        this.dialogueBoxInstance.clearDialogue();
+        if (this.dialogueBoxInstance) {
+            this.dialogueBoxInstance.clearDialogue();
+        }
     }
 
     setDialogueBoxInstance(instance) {
@@ -84,7 +108,8 @@ export class WordsMerger {
 
     clearTextMemory() {
         this.reset();
-        this.dialogueBoxInstance.clearDialogue();
-        console.log('Text memory cleared in WordsMerger');
+        if (this.dialogueBoxInstance) {
+            this.dialogueBoxInstance.clearDialogue();
+        }
     }
 }

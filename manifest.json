@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "vauxly",
+    "name": "vauxly-experiment-v1",
     "version": "1.0",
     "description": "transcribe and save calls and virtual meetings",
     "permissions": [

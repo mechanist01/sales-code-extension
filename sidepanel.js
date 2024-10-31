@@ -1,7 +1,10 @@
 import { startAudioCapture, stopAudioCapture, visualizeAudio, captureTabAudio } from './audiocapture.js';
 import { convertStreamToBase64WebM } from './utils.js';
 import { SpeechToText } from './STT.js';
-import { startRecordingAudioStreams, stopRecording, createAndUploadFiles } from './audioFile.js';
+import { startRecordingAudioStreams, stopRecording, createAndDownloadFiles, handleCall, retryFailedCall, deleteFailedCall } from './audioFile.js';
+import { createSalesForm } from './salesForm.js';
+import { resetAllData } from './totalrecall.js';
+
 let speechToText;
 let dialogueContent = '';
 let microphoneStream = null;
@@ -12,6 +15,128 @@ let volumeMeterAnimationFrame;
 
 // Create a list to hold all dialogue entries
 window.dialogueEntries = [];
+
+// Define these functions first, before any event listeners
+function displayFailedCallStatus() {
+    const failedCalls = JSON.parse(localStorage.getItem('failedCalls') || '[]');
+    const statusContainer = document.getElementById('failedCallsContainer');
+
+    if (!statusContainer) {
+        console.error('Failed calls container not found');
+        return;
+    }
+
+    // Clear existing content
+    statusContainer.innerHTML = '';
+
+    if (failedCalls.length === 0) {
+        statusContainer.style.display = 'none';
+        return;
+    }
+
+    statusContainer.style.display = 'block';
+
+    // Container structure
+    statusContainer.innerHTML = `
+        <div class="failed-calls-header">
+            <h3>Failed Uploads (${failedCalls.length})</h3>
+            <button class="clear-all-button">↺ Clear All</button>
+        </div>
+        <div class="failed-calls-content"></div>
+    `;
+
+    // Get content container
+    const contentContainer = statusContainer.querySelector('.failed-calls-content');
+
+    // Add clear all functionality
+    statusContainer.querySelector('.clear-all-button').addEventListener('click', () => {
+        localStorage.setItem('failedCalls', '[]');
+        window.dispatchEvent(new CustomEvent('failedCallsUpdated'));
+    });
+
+    // Populate failed calls
+    failedCalls.forEach(call => {
+        const statusElement = document.createElement('div');
+        statusElement.className = 'failed-call-status';
+        
+        const timestamp = new Date(call.timestamp).toLocaleString();
+        const customerName = call.metadata?.customer || 'Unknown Customer';
+        const errorMessage = call.errorDetails?.message || 'Upload failed';
+        
+        statusElement.innerHTML = `
+            <div class="status-details">
+                <span class="customer-name">${customerName}</span>
+                <span class="timestamp">${timestamp}</span>
+                <span class="error-message">${errorMessage}</span>
+            </div>
+            <div class="action-buttons">
+                <button class="retry-button" title="Retry Upload">↺</button>
+                <button class="delete-button" title="Delete">×</button>
+            </div>
+        `;
+
+        // Add retry functionality
+        const retryButton = statusElement.querySelector('.retry-button');
+        retryButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            console.log('Retrying call:', call);
+            retryButton.disabled = true;
+            retryFailedCall(call.id);
+        });
+
+        // Add delete functionality
+        const deleteButton = statusElement.querySelector('.delete-button');
+        deleteButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            statusElement.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => {
+                deleteFailedCall(call.id);
+            }, 250);
+        });
+
+        contentContainer.appendChild(statusElement);
+    });
+}
+
+function showUploadLoading() {
+    const container = document.getElementById('failedCallsContainer');
+    if (!container) return;
+
+    container.style.display = 'block';
+    container.innerHTML = `
+        <div class="upload-loading-container">
+            <div class="loading-text">
+                <div class="loading-spinner"></div>
+                <span>Uploading call...</span>
+            </div>
+            <div class="upload-progress"></div>
+        </div>
+    `;
+}
+
+function showUploadSuccess() {
+    const container = document.getElementById('failedCallsContainer');
+    if (!container) return;
+
+    container.style.display = 'block';
+    container.innerHTML = `
+        <div class="upload-success-container">
+            <div class="success-content">
+                <span class="success-icon">✓</span>
+                <span>Call uploaded successfully!</span>
+            </div>
+        </div>
+    `;
+}
+
+// Make it globally available
+window.displayFailedCallStatus = displayFailedCallStatus;
+
+// Now add the event listener
+window.addEventListener('failedCallsUpdated', () => {
+    console.log('Failed calls updated event received');
+    displayFailedCallStatus();
+});
 
 /**
  * Updates the dialogue box with new text.
@@ -64,15 +189,7 @@ function saveToLocalStorage() {
 /**
  * Loads the dialogue entries from local storage.
  */
-function loadFromLocalStorage() {
-    const savedEntries = localStorage.getItem('dialogueEntries');
-    if (savedEntries) {
-        window.dialogueEntries = JSON.parse(savedEntries);
-        const dialogueBox = document.querySelector('.dialogue-box');
-        dialogueBox.innerHTML = ''; // Clear existing content
-        window.dialogueEntries.forEach(entry => appendToDialogueBox(entry));
-    }
-}
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('DOM fully loaded and parsed');
@@ -261,33 +378,97 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     uploadButton.addEventListener('click', () => {
         console.log('Upload button clicked');
-        
-        // Ask the user for a file name
-        const fileName = prompt('Please enter a name for the file:', 'defaultFileName');
-        if (!fileName) {
-            console.log('File upload canceled by user');
-            uploadButton.disabled = false;
-            stopButton.disabled = false;
-            startButton.disabled = true;
-            return;
-        }
-        
-        // Store the file name in a global constant
-        window.uploadFileName = fileName;
-        
-        // Update button states immediately
-        uploadButton.disabled = true;
-        stopButton.disabled = true;
-        startButton.disabled = false;
-        
-        // Create and upload the files with the specified file name
-        createAndUploadFiles(window.micRecorder, window.tabRecorder, window.micChunks, window.tabChunks, window.uploadFileName, () => {
-            console.log('Upload complete');
-            resetAllData(); // Clear the dialogue box and memory
-            if (speechToText && speechToText.wordsMerger) {
-                speechToText.wordsMerger.clearTextMemory(); // Clear text memory in WordsMerger
+        const uploadButtonText = uploadButton.textContent;
+
+        if (uploadButtonText === 'Upload') {
+            // First click - show the sales form
+            const elements = {
+                dialogueBox: document.querySelector('.dialogue-box'),
+                uploadButton: document.getElementById('uploadButton'),
+                startButton: document.getElementById('startRecording')
+            };
+
+            // Hide the dialogue box before creating the form
+            if (elements.dialogueBox) {
+                elements.dialogueBox.style.height = '0px';
+                elements.dialogueBox.style.overflow = 'hidden';
+                elements.dialogueBox.classList.add('transparent');
             }
-        });
+
+            createSalesForm(
+                elements,
+                window.micChunks,
+                window.tabChunks,
+                handleCall,
+                true
+            );
+        } else if (uploadButtonText === 'Send') {
+            // Immediately change button text back to Upload and update button states
+            uploadButton.textContent = 'Upload';
+            uploadButton.disabled = true;
+            
+            const startButton = document.getElementById('startRecording');
+            if (startButton) {
+                startButton.disabled = false;
+            }
+            
+            // Get elements
+            const dialogueBox = document.querySelector('.dialogue-box');
+            const inputContainer = document.querySelector('.input-container');
+            
+            // Clear the dialogue box content before showing it
+            if (dialogueBox) {
+                dialogueBox.innerHTML = ''; // Clear all content
+                dialogueBox.classList.remove('transparent');
+                dialogueBox.style.height = '400px';
+                dialogueBox.style.overflow = 'auto';
+                dialogueBox.style.transition = 'all 0.3s ease-in-out';
+            }
+
+            // Hide and remove the sales form
+            if (inputContainer) {
+                inputContainer.style.opacity = '0';
+                inputContainer.style.transition = 'opacity 0.3s ease-in-out';
+                
+                setTimeout(() => {
+                    inputContainer.remove();
+                }, 300);
+            }
+
+            // Get form data for submission
+            const formData = {
+                rep: document.getElementById('repDropdown')?.value,
+                customer: document.getElementById('customerInput')?.value,
+                saleStatus: document.getElementById('saleStatusDropdown')?.value,
+                saleAmount: document.getElementById('saleAmountInput')?.value,
+                brand: document.getElementById('brandDropdown')?.value,
+                products: document.getElementById('productsDropdown')?.value
+            };
+
+            // Submit the form data and reset the dialogue box
+            createAndDownloadFiles(window.micChunks, window.tabChunks, () => {
+                handleCall(
+                    formData.rep,
+                    formData.customer,
+                    formData.saleStatus,
+                    formData.saleAmount,
+                    formData.brand,
+                    formData.products
+                );
+
+                // Reset all data including the dialogue box
+                resetAllData();
+                
+                // Explicitly clear DialogueBox instance if it exists
+                if (window.dialogueBox && typeof window.dialogueBox.clearDialogue === 'function') {
+                    window.dialogueBox.clearDialogue();
+                }
+
+                // Reset button states
+                uploadButton.disabled = true;
+                startButton.disabled = false;
+            });
+        }
     });
 
     async function startRecording(stream) {
@@ -446,30 +627,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     });
+
+    // Initialize failed calls display
+    displayFailedCallStatus();
 });
-
-// Function to reset all data and displays
-function resetAllData() {
-    console.log('Resetting all data...');
-
-    const dialogueBox = document.querySelector('.dialogue-box');
-    if (dialogueBox) {
-        dialogueBox.innerHTML = '';
-    } else {
-        console.warn('Dialogue box not found');
-    }
-
-    window.dialogueEntries = [];
-    localStorage.removeItem('dialogueEntries'); // Clear local storage
-
-    // Reset displays
-    document.getElementById('status').textContent = '';
-    document.getElementById('websocketStatusText').textContent = '';
-    document.getElementById('volumeBarFill').style.width = '0%';
-    document.getElementById('volumeMeterFill').style.width = '0%';
-
-    console.log('All data reset complete');
-}
 
 function hideDropdown() {
     const dropdownContainer = document.getElementById('dropdownContainer');

@@ -35,17 +35,19 @@
     </div>
     <!-- Add the sentiment bar container here -->
     <div class="dialogue-container">
-      <h3 class="section-title">Customer Notes</h3>
       <div id="dialogueBox" class="dialogue-box"></div>
       <!-- Add the Upload button here -->
       <button id="uploadButton" style="width: 100%; margin-top: 10px;" disabled>Upload</button>
 
       <!-- Add the volume meter container here -->
-      <div id="volumeMeterContainer" style="margin-top: 10px;">
-        <div id="volumeMeter" style="height: 20px; background-color: #ccc; border-radius: 5px; overflow: hidden;">
-          <div id="volumeMeterFill" style="height: 100%; width: 0%; background-color: #3498db;"></div>
+      <div id="volumeMeterContainer">
+        <div id="volumeMeter">
+          <div id="volumeMeterFill"></div>
         </div>
       </div>
+
+      <!-- Failed calls container moved inside the main container -->
+      <div id="failedCallsContainer" class="failed-calls-container"></div>
     </div>
   </div>
   <script type="module" src="sidepanel.js"></script>

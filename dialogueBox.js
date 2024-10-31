@@ -1,82 +1,71 @@
 export class DialogueBox {
     constructor(dialogueBoxId) {
         this.dialogueBox = document.getElementById(dialogueBoxId);
-        this.dialogueEntries = [];
-        this.currentText = '';
-        this.loadFromLocalStorage();
-    }
-
-    updateDialogueBox(text, isHTML = false, isSummary = false, isBubble = false) {
-        const entry = { text, isHTML, isSummary, isBubble };
-        this.dialogueEntries.push(entry);
-        this.appendToDialogueBox(entry);
-        this.saveToLocalStorage();
-        this.scrollToBottom();
-    }
-
-    updateCurrentText(text) {
-        this.currentText = text;
-        this.renderDialogueBox();
-    }
-
-    appendToDialogueBox(entry) {
-        let newContent;
-        if (entry.isBubble) {
-            newContent = `<div class="message-bubble">${entry.text}</div>`;
-        } else if (entry.isSummary) {
-            newContent = `<div class="summary">${entry.text}</div>`;
-        } else if (entry.isHTML) {
-            newContent = entry.text;
-        } else {
-            newContent = `<p>${entry.text}</p>`;
+        if (!this.dialogueBox) {
+            this.createDialogueBox(dialogueBoxId);
         }
-        this.dialogueBox.insertAdjacentHTML('beforeend', newContent);
+        this.maxCharacters = 10000;
+        this.shouldAutoScroll = true;
+
+        // Add scroll event listener to detect when user manually scrolls
+        this.dialogueBox.addEventListener('scroll', () => {
+            const isAtBottom = this.isUserAtBottom();
+            this.shouldAutoScroll = isAtBottom;
+        });
     }
 
-    renderDialogueBox() {
-        this.dialogueBox.innerHTML = this.dialogueEntries.map(entry => {
-            if (entry.isSummary) {
-                return `<div class="summary">${entry.text}</div>`;
-            } else if (entry.isHTML) {
-                return entry.text;
-            } else if (entry.isBubble) {
-                return `<div class="message-bubble">${entry.text}</div>`;
-            } else {
-                return `<p>${entry.text}</p>`;
+    createDialogueBox(dialogueBoxId) {
+        this.dialogueBox = document.createElement('div');
+        this.dialogueBox.id = dialogueBoxId;
+        this.dialogueBox.className = 'dialogue-box message-box';
+        document.body.appendChild(this.dialogueBox);
+    }
+
+    updateDialogueBox(text, isBubble = false, addNewLine = false, isPartial = false) {
+        if (!text || text.trim() === '') return;
+
+        // Remove any existing undefined paragraphs
+        const undefinedParagraphs = this.dialogueBox.getElementsByTagName('p');
+        Array.from(undefinedParagraphs).forEach(p => {
+            if (p.textContent === 'undefined') {
+                p.remove();
             }
-        }).join('');
+        });
 
-        if (this.currentText) {
-            this.dialogueBox.insertAdjacentHTML('beforeend', `<p>${this.currentText}</p>`);
+        // Always create a message bubble wrapper
+        const wrapper = document.createElement('div');
+        wrapper.className = 'message-bubble';
+        if (isPartial) wrapper.classList.add('partial-text');
+        if (addNewLine) wrapper.style.marginTop = '1rem';
+        
+        wrapper.textContent = text;
+        this.dialogueBox.appendChild(wrapper);
+
+        while (this.dialogueBox.textContent.length > this.maxCharacters) {
+            this.dialogueBox.removeChild(this.dialogueBox.firstChild);
         }
 
-        this.scrollToBottom();
-    }
-
-    saveToLocalStorage() {
-        if (this.dialogueEntries.length === 0) {
-            localStorage.removeItem('dialogueEntries');
-        } else {
-            localStorage.setItem('dialogueEntries', JSON.stringify(this.dialogueEntries));
+        // Only auto-scroll if user was already at bottom
+        if (this.shouldAutoScroll) {
+            this.scrollToBottom();
         }
-    }
-
-    loadFromLocalStorage() {
-        const savedEntries = localStorage.getItem('dialogueEntries');
-        if (savedEntries) {
-            this.dialogueEntries = JSON.parse(savedEntries);
-            this.renderDialogueBox();
-        }
-    }
-
-    clearDialogue() {
-        this.dialogueEntries = [];
-        this.currentText = '';
-        this.renderDialogueBox();
-        this.saveToLocalStorage();
     }
 
     scrollToBottom() {
         this.dialogueBox.scrollTop = this.dialogueBox.scrollHeight;
+    }
+
+    clearDialogue() {
+        this.dialogueBox.innerHTML = '';
+        this.shouldAutoScroll = true;  // Reset auto-scroll on clear
+    }
+
+    isUserAtBottom(threshold = 50) {
+        const scrollHeight = this.dialogueBox.scrollHeight;
+        const scrollTop = this.dialogueBox.scrollTop;
+        const clientHeight = this.dialogueBox.clientHeight;
+        
+        // Consider "at bottom" if within threshold pixels of bottom
+        return scrollHeight - (scrollTop + clientHeight) <= threshold;
     }
 }
