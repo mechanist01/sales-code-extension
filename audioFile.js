@@ -43,6 +43,9 @@ export function createAndDownloadFiles(micChunks, tabChunks, onComplete) {
         status: 'pending'
     };
 
+    // Get the metadata stored by handleCall
+    const metadata = window.currentCallMetadata || {};
+
     Promise.all([
         new Promise(resolve => {
             const micBlob = new Blob(micChunks, { type: 'audio/wav' });
@@ -61,13 +64,24 @@ export function createAndDownloadFiles(micChunks, tabChunks, onComplete) {
         callData.micAudio = micData.base64;
         callData.tabAudio = tabData.base64;
 
-        const formData = new FormData();
-        formData.append('micAudio', micData.blob, 'rep.wav');
-        formData.append('tabAudio', tabData.blob, 'customer.wav');
+        const apiFormData = new FormData();
+        
+        // Add the audio files
+        apiFormData.append('audio1', micData.blob, 'rep.wav');
+        apiFormData.append('audio2', tabData.blob, 'customer.wav');
+        
+        // Add the metadata from handleCall
+        apiFormData.append('name', metadata.rep || '');
+        apiFormData.append('sale', metadata.saleStatus || '');
+        apiFormData.append('rep', metadata.rep || '');
+        apiFormData.append('customer', metadata.customer || '');
+        apiFormData.append('saleAmount', metadata.saleAmount || '');
+        apiFormData.append('brand', metadata.brand || '');
+        apiFormData.append('product', metadata.products || '');
 
         fetch('http://127.0.0.1:5000/be-flow', {
             method: 'POST',
-            body: formData
+            body: apiFormData
         })
         .then(response => {
             if (!response.ok) {
@@ -77,6 +91,8 @@ export function createAndDownloadFiles(micChunks, tabChunks, onComplete) {
         })
         .then(data => {
             console.log('Success:', data);
+            // Clear the stored metadata after successful upload
+            window.currentCallMetadata = null;
             if (onComplete) {
                 onComplete(true);
             }
@@ -176,6 +192,9 @@ export function handleCall(rep, customer, saleStatus, saleAmount, brand, product
         lastCall.metadata = callMetadata;
         localStorage.setItem('failedCalls', JSON.stringify(failedCalls));
     }
+
+    // Store the current call metadata globally
+    window.currentCallMetadata = callMetadata;
 }
 
 // Add a function to retry failed calls

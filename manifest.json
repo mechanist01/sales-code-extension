@@ -13,15 +13,26 @@
         "contentSettings",
         "microphone",
         "offscreen",
-        "scripting"
+        "scripting",
+        "contextMenus"
+    ],
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["contentScript.js"]
+        }
     ],
     "web_accessible_resources": [
         {
-            "resources": ["requestPermissions.html", "requestPermissions.js"],
+            "resources": ["requestPermissions.html", "requestPermissions.js","stickypaste.js"],
             "matches": ["<all_urls>"]
         },
         {
             "resources": ["offscreen.html"],
+            "matches": ["<all_urls>"]
+        },
+        {
+            "resources": ["notes.js"],
             "matches": ["<all_urls>"]
         }
     ],

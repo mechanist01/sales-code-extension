@@ -8,6 +8,7 @@
 <body>
   <header class="app-header">
     <h1>vauxly</h1>
+    <div id="timeInfo" class="time-info"></div>
   </header>
   <div class="container">
     <div id="controls">
@@ -39,6 +40,14 @@
       <!-- Add the Upload button here -->
       <button id="uploadButton" style="width: 100%; margin-top: 10px;" disabled>Upload</button>
 
+      <!-- Add the pen icon here -->
+      <div class="pen-icon" id="addNote">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"></path>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+        </svg>
+      </div>
+
       <!-- Add the volume meter container here -->
       <div id="volumeMeterContainer">
         <div id="volumeMeter">
@@ -51,6 +60,5 @@
     </div>
   </div>
   <script type="module" src="sidepanel.js"></script>
-  <script type="module" src="uploadMain.js"></script>
 </body>
 </html>

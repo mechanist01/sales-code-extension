@@ -412,61 +412,76 @@ document.addEventListener('DOMContentLoaded', async () => {
                 startButton.disabled = false;
             }
             
-            // Get elements
+            // Reset dialogue box UI
             const dialogueBox = document.querySelector('.dialogue-box');
             const inputContainer = document.querySelector('.input-container');
             
-            // Clear the dialogue box content before showing it
             if (dialogueBox) {
-                dialogueBox.innerHTML = ''; // Clear all content
+                dialogueBox.innerHTML = '';
                 dialogueBox.classList.remove('transparent');
                 dialogueBox.style.height = '400px';
                 dialogueBox.style.overflow = 'auto';
                 dialogueBox.style.transition = 'all 0.3s ease-in-out';
             }
 
-            // Hide and remove the sales form
             if (inputContainer) {
                 inputContainer.style.opacity = '0';
                 inputContainer.style.transition = 'opacity 0.3s ease-in-out';
-                
-                setTimeout(() => {
-                    inputContainer.remove();
-                }, 300);
+                setTimeout(() => inputContainer.remove(), 300);
             }
 
-            // Get form data for submission
-            const formData = {
-                rep: document.getElementById('repDropdown')?.value,
-                customer: document.getElementById('customerInput')?.value,
-                saleStatus: document.getElementById('saleStatusDropdown')?.value,
-                saleAmount: document.getElementById('saleAmountInput')?.value,
-                brand: document.getElementById('brandDropdown')?.value,
-                products: document.getElementById('productsDropdown')?.value
-            };
-
-            // Submit the form data and reset the dialogue box
-            createAndDownloadFiles(window.micChunks, window.tabChunks, () => {
-                handleCall(
-                    formData.rep,
-                    formData.customer,
-                    formData.saleStatus,
-                    formData.saleAmount,
-                    formData.brand,
-                    formData.products
-                );
-
-                // Reset all data including the dialogue box
-                resetAllData();
+            // Get and save form data with notes
+            chrome.tabs.query({active: true, currentWindow: true}, async (tabs) => {
+                const tab = tabs[0];
+                const url = new URL(tab.url);
+                const currentOrigin = url.origin;
                 
-                // Explicitly clear DialogueBox instance if it exists
-                if (window.dialogueBox && typeof window.dialogueBox.clearDialogue === 'function') {
-                    window.dialogueBox.clearDialogue();
-                }
+                chrome.storage.local.get(['stickyNotes'], (result) => {
+                    const stickyNotes = result.stickyNotes || {};
+                    const noteData = stickyNotes[currentOrigin];
+                    const noteContent = noteData?.content || '';
 
-                // Reset button states
-                uploadButton.disabled = true;
-                startButton.disabled = false;
+                    const formData = {
+                        rep: document.getElementById('repDropdown')?.value,
+                        customer: document.getElementById('customerInput')?.value,
+                        saleStatus: document.getElementById('saleStatusDropdown')?.value,
+                        saleAmount: document.getElementById('saleAmountInput')?.value,
+                        brand: document.getElementById('brandDropdown')?.value,
+                        products: document.getElementById('productsDropdown')?.value,
+                        notes: noteContent,
+                        date: new Date().toISOString()
+                    };
+
+                    // Save call data to storage
+                    chrome.storage.local.get(['savedCalls'], (result) => {
+                        const savedCalls = result.savedCalls || [];
+                        savedCalls.push(formData);
+                        chrome.storage.local.set({ savedCalls }, () => {
+                            console.log('Call saved with notes');
+                        });
+                    });
+
+                    // Handle call and create files
+                    handleCall(
+                        formData.rep,
+                        formData.customer,
+                        formData.saleStatus,
+                        formData.saleAmount,
+                        formData.brand,
+                        formData.products
+                    );
+
+                    createAndDownloadFiles(window.micChunks, window.tabChunks, () => {
+                        resetAllData();
+                        
+                        if (window.dialogueBox?.clearDialogue) {
+                            window.dialogueBox.clearDialogue();
+                        }
+
+                        uploadButton.disabled = true;
+                        startButton.disabled = false;
+                    });
+                });
             });
         }
     });
@@ -630,6 +645,63 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize failed calls display
     displayFailedCallStatus();
+
+    // Add pen button to the UI
+    const controlsContainer = document.querySelector('.controls-container');
+    if (controlsContainer) {
+        const penContainer = createPenButton();
+        controlsContainer.appendChild(penContainer);
+    }
+
+    // Set up message listener for note status updates
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.action === 'updatePenButtonDot') {
+            const noteDot = document.querySelector('.note-status-dot');
+            if (noteDot) {
+                noteDot.style.display = request.show ? 'block' : 'none';
+            }
+        }
+    });
+
+    // Check for existing saved notes on load
+    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (activeTab) {
+        const url = new URL(activeTab.url);
+        const origin = url.origin;
+
+        chrome.storage.local.get(['savedNotes'], (result) => {
+            const savedNotes = result.savedNotes || {};
+            const noteDot = document.querySelector('.note-status-dot');
+            if (noteDot) {
+                noteDot.style.display = savedNotes[origin] ? 'block' : 'none';
+            }
+        });
+    }
+
+    // Add this at the beginning of the DOMContentLoaded event listener
+    function updateTimeInfo() {
+        const now = new Date();
+        const timeInfo = document.getElementById('timeInfo');
+        
+        const time = now.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+        });
+        
+        const date = now.toLocaleDateString('en-US', {
+            month: '2-digit',
+            day: '2-digit'
+        });
+        
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        
+        timeInfo.textContent = `${time} ${date} ${timezone}`;
+    }
+
+    // Update time immediately and then every minute
+    updateTimeInfo();
+    setInterval(updateTimeInfo, 60000);
 });
 
 function hideDropdown() {
@@ -645,4 +717,188 @@ function showDropdown() {
         dropdownContainer.style.display = 'flex';
     }
 }
+
+class CircularWaveVisualization {
+    constructor(container) {
+        this.container = container;
+        this.numBars = 60;
+        this.maxHeight = 44;
+        // Set a fixed size for the visualization
+        this.size = 48; // 48px square
+        this.setup();
+    }
+
+    setup() {
+        // Clear container and set its size
+        this.container.style.width = `${this.size}px`;
+        this.container.style.height = `${this.size}px`;
+        this.container.style.position = 'relative';
+        
+        this.container.innerHTML = `
+            <div style="
+                width: ${this.size}px;
+                height: ${this.size}px;
+                position: relative;
+            ">
+                <div style="
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    width: ${this.size * 0.25}px;
+                    height: ${this.size * 0.25}px;
+                    background-color: #2d3748;
+                    border-radius: 50%;
+                    transform: translate(-50%, -50%);
+                    z-index: 10;
+                "></div>
+                ${Array.from({ length: this.numBars }, (_, i) => {
+                    const angle = (i * 360) / this.numBars;
+                    return `
+                        <div style="
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            height: ${this.size / 2}px;
+                            width: 1px;
+                            transform-origin: bottom center;
+                            transform: rotate(${angle}deg) translateX(-50%);
+                        ">
+                            <div class="wave-bar" style="
+                                position: absolute;
+                                bottom: ${this.size * 0.15}px;
+                                left: 0;
+                                width: 100%;
+                                background-color: white;
+                                height: 0%;
+                                transition: height 100ms linear;
+                            "></div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+
+        this.bars = this.container.querySelectorAll('.wave-bar');
+    }
+
+    isCardinalPosition(index) {
+        const angle = (index * 360) / this.numBars;
+        return [0, 90, 180, 270].some(cardinal => 
+            Math.abs(angle - cardinal) < (360 / this.numBars / 2)
+        );
+    }
+
+    isAdjacentToCardinal(index) {
+        const angle = (index * 360) / this.numBars;
+        return [0, 90, 180, 270].some(cardinal => {
+            const distance = Math.abs(angle - cardinal);
+            return distance > (360 / this.numBars / 2) && 
+                   distance < (360 / this.numBars * 1.5);
+        });
+    }
+
+    updateVolume(volume) {
+        this.bars.forEach((bar, i) => {
+            let height;
+            if (this.isCardinalPosition(i)) {
+                height = volume * 1.4; // 40% longer for cardinal points
+            } else if (this.isAdjacentToCardinal(i)) {
+                height = volume * 1.25; // 25% longer for adjacent bars
+            } else {
+                height = volume * 0.85; // 15% shorter for other bars
+            }
+            bar.style.height = `${height}%`;
+        });
+    }
+}
+
+// Make sure the createPenButton function properly sets up the event listener
+function createPenButton() {
+    const penContainer = document.createElement('div');
+    penContainer.className = 'pen-container';
+    penContainer.style.cssText = `
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        margin-left: 10px;
+    `;
+
+    const penButton = document.createElement('button');
+    penButton.className = 'pen-button';
+    penButton.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+        </svg>
+    `;
+    penButton.style.cssText = `
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        padding: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    `;
+
+    const noteDot = document.createElement('div');
+    noteDot.className = 'note-status-dot';
+    noteDot.style.cssText = `
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        width: 8px;
+        height: 8px;
+        background-color: #e53e3e;
+        border-radius: 50%;
+        display: none;
+    `;
+
+    penButton.appendChild(noteDot);
+    penContainer.appendChild(penButton);
+
+    // Update the pen button click event listener
+    penButton.addEventListener('click', async () => {
+        try {
+            const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            const url = new URL(activeTab.url);
+            const origin = url.origin;
+
+            chrome.storage.local.get(['savedNotes'], (result) => {
+                const savedNotes = result.savedNotes || {};
+                chrome.tabs.sendMessage(activeTab.id, {
+                    action: savedNotes[origin] ? 'openSavedNote' : 'createNewNote',
+                    origin: origin,
+                    content: savedNotes[origin]?.content || ''
+                });
+            });
+        } catch (error) {
+            console.error('Error handling pen button click:', error);
+        }
+    });
+
+    return penContainer;
+}
+
+// Add these helper functions to manage note status
+function updatePenButtonDot(show) {
+    const noteDot = document.querySelector('.note-status-dot');
+    if (noteDot) {
+        noteDot.style.display = show ? 'block' : 'none';
+    }
+}
+
+// Add listener for storage changes
+chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'local' && changes.savedNotes) {
+        chrome.tabs.query({ active: true, currentWindow: true }, ([activeTab]) => {
+            if (activeTab) {
+                const url = new URL(activeTab.url);
+                const origin = url.origin;
+                const savedNotes = changes.savedNotes.newValue || {};
+                updatePenButtonDot(!!savedNotes[origin]);
+            }
+        });
+    }
+});
 

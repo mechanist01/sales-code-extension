@@ -1,4 +1,6 @@
 import { createAndDownloadFiles } from './audioFile.js';
+import { injectStickyNote } from './notes.js';
+
 export function createSalesForm({ dialogueBox, uploadButton, startButton }, micChunks, tabChunks, handleCall, show = true) {
     console.log('Creating sales form...');
 
@@ -121,3 +123,19 @@ export function createSalesForm({ dialogueBox, uploadButton, startButton }, micC
 
     return inputContainer;
 }
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // ... your existing code ...
+
+    // Add click handler for the pen icon
+    const addNoteButton = document.getElementById('addNote');
+    if (addNoteButton) {
+        addNoteButton.addEventListener('click', async () => {
+            try {
+                await injectStickyNote();
+            } catch (error) {
+                console.error('Failed to add note:', error);
+            }
+        });
+    }
+});

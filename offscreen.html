@@ -1,10 +1,33 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>vauxly</title>
+    <title>v-notes</title>
     <script src="offscreen.js"></script>
+    <link rel="stylesheet" href="offscreenStyles.css">
   </head>
   <body>
-    <p>This is an offscreen document for handling microphone permissions for vauxly.</p>
+    <div class="search-container">
+    </div>
+    <div class="filter-bar">
+        <div class="filter-item">
+            <span class="filter-label">Sort by:</span>
+            <select class="filter-select" id="sortSelect">
+                <option value="date-desc">Date (Newest)</option>
+                <option value="date-asc">Date (Oldest)</option>
+                <option value="customer">Customer Name</option>
+                <option value="amount">Sale Amount</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <span class="filter-label">Filter Rep:</span>
+            <select class="filter-select" id="repFilter">
+                <option value="all">All Reps</option>
+            </select>
+        </div>
+    </div>
+    <div class="grid-container" id="callGrid">
+        <!-- Cards will be dynamically inserted here -->
+    </div>
+    <script src="offscreenView.js"></script>
   </body>
 </html>

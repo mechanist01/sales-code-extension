@@ -122,6 +122,41 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendResponse({ success: false, error: error.message });
     });
     return true; // Indicates that the response is sent asynchronously
+  } else if (request.action === "getNoteContent") {
+    chrome.storage.local.get(['stickyNotes'], (result) => {
+      const stickyNotes = result.stickyNotes || {};
+      const url = new URL(sender.tab.url);
+      const currentOrigin = url.origin;
+      
+      // Find the relevant note
+      const noteData = Object.values(stickyNotes).find(note => 
+        note.persistentNote && note.showOnAllPages ||
+        note.ownerOrigin === currentOrigin
+      );
+
+      sendResponse({ content: noteData?.content || '' });
+    });
+    return true;
+  } else if (request.type === 'NOTE_CONTENT_UPDATED') {
+    console.log('Background received content update:', request.data);
+    
+    // Get all tabs except sender
+    chrome.tabs.query({}, (tabs) => {
+      tabs.forEach(tab => {
+        if (tab.id !== sender.tab?.id) {
+          // Send update to each tab
+          chrome.tabs.sendMessage(tab.id, {
+            type: 'UPDATE_NOTE_CONTENT',
+            data: request.data
+          }).catch(error => {
+            console.log(`Failed to send to tab ${tab.id}:`, error);
+          });
+        }
+      });
+    });
+    
+    sendResponse({ success: true });
+    return true;
   }
 });
 
@@ -135,4 +170,20 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.set({ assemblyAIKey: '189b301d34764c52927f66083fb7c0b9' }, () => {
     console.log('API key saved');
   });
+
+  // Create the context menu item
+  chrome.contextMenus.create({
+    id: "pasteStickyNote",
+    title: "Paste Sticky Note Content",
+    contexts: ["editable"]  // Makes it appear only on input fields and textareas
+  });
+});
+
+// Add context menu click handler
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === "pasteStickyNote") {
+    chrome.tabs.sendMessage(tab.id, {
+      action: 'pasteStickyContent'
+    });
+  }
 });

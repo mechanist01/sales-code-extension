@@ -1,0 +1,337 @@
+/* Main layout */
+body {
+    padding: 1rem;
+    overflow-y: auto;
+    background-color: #1a202c;
+}
+
+/* Search */
+.search-container {
+    background-color: #2d3748;
+    border: 1px solid #4a5568;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    margin: 1rem 2rem;
+}
+
+.search-input {
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #1a202c;
+    border: 1px solid #4a5568;
+    border-radius: 0.25rem;
+    color: #f7fafc;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+    border-color: #3182ce;
+}
+
+.search-input::placeholder {
+    color: #a0aec0;
+}
+
+/* Grid layout */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+    margin: 1rem;
+    padding: 0.5rem;
+}
+
+.grid-container > * {
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Card base - with grid layout */
+.call-card {
+    background-color: #2d3748;
+    border: 1px solid #4a5568;
+    border-radius: 0.25rem;
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1/1.3;
+    transition: all 0.2s ease;
+    display: grid;
+    grid-template-rows: auto auto auto minmax(0, 1fr) 40%;
+    color: #f7fafc;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    pointer-events: auto;
+}
+
+/* Card actions header */
+.card-actions-header {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background-color: rgba(26, 32, 44, 0.1);
+    border-bottom: 1px solid #4a5568;
+}
+
+/* Action buttons */
+.card-action-button {
+    width: 24px;
+    height: 24px;
+    background-color: rgba(26, 32, 44, 0.2);
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    color: #a0aec0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    padding: 0;
+}
+
+.card-action-button:hover {
+    background-color: rgba(26, 32, 44, 0.4);
+    border-color: #4a5568;
+    color: #f7fafc;
+}
+
+.delete-card:hover {
+    background-color: rgba(229, 62, 62, 0.1);
+    border-color: #fc8181;
+    color: #fc8181;
+}
+
+/* Customer section */
+.customer-section {
+    padding: 0.625rem 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(26, 32, 44, 0.05);
+    border-bottom: 1px solid #4a5568;
+}
+
+.customer-name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #f7fafc;
+}
+
+/* Date section */
+.date-section {
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(26, 32, 44, 0.1);
+    border-bottom: 1px solid #4a5568;
+}
+
+.call-date {
+    color: #a0aec0;
+    font-size: 0.75rem;
+}
+
+.amount-value {
+    color: #48bb78;
+    font-weight: 600;
+    font-size: 0.8125rem;
+}
+
+/* Call details */
+.call-details {
+    padding: 0.625rem 0.75rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    background-color: transparent;
+    overflow-y: hidden;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.detail-label {
+    color: #a0aec0;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.detail-value {
+    color: #f7fafc;
+    font-size: 0.8125rem;
+}
+
+/* Status badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.status-completed {
+    background-color: #48bb7833;
+    color: #48bb78;
+}
+
+.status-pending {
+    background-color: #ad0e0e38;
+    color: #ad0e0e;
+}
+
+/* Notes section - fixed height */
+.notes-section {
+    background-color: rgba(26, 32, 44, 0.1);
+    border-top: 1px solid #4a5568;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.notes-content {
+    color: #a0aec0;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    padding: 0.625rem 0.75rem;
+    overflow-y: auto;
+    height: 100%;
+}
+
+/* Filter bar */
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 2rem;
+    padding: 1rem;
+    background-color: #2d3748;
+    border-radius: 0.25rem;
+    border: 1px solid #4a5568;
+    flex-wrap: wrap;
+}
+
+.filter-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-label {
+    color: #a0aec0;
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.filter-select {
+    background-color: #1a202c;
+    border: 1px solid #4a5568;
+    color: #f7fafc;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    min-width: 120px;
+}
+
+/* Search highlighting */
+.search-highlight {
+    background-color: rgba(49, 130, 206, 0.3);
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.125rem;
+}
+
+/* Expanded state improvements */
+.call-card.expanded {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 480px;
+    height: 85vh;
+    aspect-ratio: unset;
+    z-index: 1000;
+    grid-template-rows: auto auto auto 1fr 50%;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    pointer-events: auto;
+}
+
+.call-card.expanded .notes-content {
+    max-height: none;
+}
+
+/* Overlay styles - add pointer-events */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 999;
+}
+
+.overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Add overlay handling to JavaScript */
+.call-card.expanded + .overlay {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Hover effects */
+.call-card:not(.expanded):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Improve scrolling in expanded state */
+.call-card.expanded .call-details {
+    height: 150px;
+    scrollbar-width: thin;
+    scrollbar-color: #4a5568 transparent;
+}
+
+
+.call-card.expanded .notes-content {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #4a5568 transparent;
+}
+
+/* Scrollbar styling */
+.call-card.expanded .call-details::-webkit-scrollbar,
+.call-card.expanded .notes-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.call-card.expanded .call-details::-webkit-scrollbar-track,
+.call-card.expanded .notes-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.call-card.expanded .call-details::-webkit-scrollbar-thumb,
+.call-card.expanded .notes-content::-webkit-scrollbar-thumb {
+    background-color: #4a5568;
+    border-radius: 0.25rem;
+}

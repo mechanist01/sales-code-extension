@@ -26,7 +26,7 @@ h1 {
   font-size: 30px;
   font-family: 'Roboto', sans-serif;
   color: #f7fafc;
-  text-align: center;
+  text-align: left;
   margin-bottom: 0;
 }
 
@@ -84,6 +84,7 @@ button:disabled {
 
 .app-header {
   display: flex;
+  flex-direction: column;
   align-items: left;
   padding: 10px;
   color: #f7fafc;
@@ -440,4 +441,457 @@ button:disabled {
   height: 100%;
   width: 0%;
   background-color: #3182ce;
+}
+
+.pen-icon {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  color: #f7fafc;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+  z-index: 1000;
+}
+
+.pen-icon:hover {
+  transform: scale(1.1);
+  background-color: #2b6cb0;
+}
+
+.pen-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.pen-icon {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  color: #f7fafc;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  z-index: 1000;
+}
+
+.pen-icon:hover {
+  transform: scale(1.1);
+}
+
+.pen-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Add styles for the sticky checkbox */
+.sticky-checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: auto;
+  font-family: 'Arial', sans-serif;
+  font-size: 12px;
+  color: #666;
+}
+
+.sticky-checkbox {
+  cursor: pointer;
+  margin: 0;
+}
+
+/* Sticky Note Styles */
+.sticky-note {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 250px;
+    height: 750px; /* 3:1 ratio with width */
+    background-color: #2d3748;
+    padding: 0;
+    border-radius: 0.25rem;
+    border: 1px solid #4a5568;
+    z-index: 10000;
+    resize: both;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.sticky-note-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid #4a5568;
+    background-color: #2d3748;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    border-radius: 0.25rem 0.25rem 0 0;
+}
+
+.sticky-note-close {
+    background: transparent;
+    border: none;
+    color: #a0aec0;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s;
+    font-size: 0.75rem;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sticky-note-close:hover {
+    color: #f7fafc;
+    background-color: #4a5568;
+}
+
+.sticky-note-content {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background-color: #2d3748;
+    resize: none;
+    font-family: 'Arial', sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: #f7fafc;
+    padding: 0.875rem;
+    box-sizing: border-box;
+}
+
+.sticky-note-content:focus {
+    outline: none;
+}
+
+.sticky-note-footer {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border-top: 1px solid #4a5568;
+    background-color: #2d3748;
+    position: sticky;
+    bottom: 0;
+}
+
+.sticky-checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Arial', sans-serif;
+    font-size: 0.875rem;
+    color: #a0aec0;
+}
+
+.sticky-checkbox {
+    cursor: pointer;
+    margin: 0;
+    accent-color: #3182ce;
+}
+
+.sticky-note-content::placeholder {
+    color: #a0aec0;
+}
+
+/* Scrollbar styles to match dialogue box */
+.sticky-note-content::-webkit-scrollbar {
+    width: 0.5rem;
+}
+
+.sticky-note-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 0.25rem;
+}
+
+.sticky-note-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 0.25rem;
+}
+
+.sticky-note-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Add these styles to your existing CSS */
+.pen-button svg {
+    width: 20px;
+    height: 20px;
+    stroke: #a0aec0;
+    transition: stroke 0.2s;
+}
+
+.pen-button:hover svg {
+    stroke: #f7fafc;
+}
+
+.note-status-dot {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background-color: #e53e3e;
+    border-radius: 50%;
+    display: none;
+    border: 2px solid #2d3748;
+}
+
+.save-delete-prompt {
+    padding: 1rem;
+    text-align: center;
+    border-top: 1px solid #4a5568;
+    background-color: #2d3748;
+    color: #f7fafc;
+}
+
+.prompt-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.prompt-icon {
+    background: transparent;
+    border: none;
+    color: #a0aec0;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s;
+}
+
+.prompt-icon:hover {
+    color: #f7fafc;
+    background-color: #4a5568;
+}
+
+.offscreen-container {
+    background-color: #1a202c;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.search-container {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: #2d3748;
+    border-radius: 0.25rem;
+    border: 1px solid #4a5568;
+    display: flex;
+    gap: 1rem;
+}
+
+.search-input {
+    flex: 1;
+    background-color: #1a202c;
+    border: 1px solid #4a5568;
+    border-radius: 0.25rem;
+    color: #f7fafc;
+    padding: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.search-input::placeholder {
+    color: #a0aec0;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #3182ce;
+}
+
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: #2d3748;
+    border-radius: 0.25rem;
+    border: 1px solid #4a5568;
+    flex-wrap: wrap;
+}
+
+.filter-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-label {
+    color: #a0aec0;
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.filter-select {
+    background-color: #1a202c;
+    border: 1px solid #4a5568;
+    color: #f7fafc;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    min-width: 120px;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.call-card {
+    background-color: #2d3748;
+    border: 1px solid #4a5568;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    animation: slideIn 0.3s ease-out;
+    position: relative;
+    max-width: 300px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.delete-card {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: #a0aec0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    padding: 0;
+}
+
+.delete-card:hover {
+    color: #fc8181;
+    background-color: rgba(252, 129, 129, 0.1);
+}
+
+.delete-card svg {
+    width: 16px;
+    height: 16px;
+}
+
+.call-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #4a5568;
+    padding-right: 24px; /* Make space for delete button */
+}
+
+.customer-name {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #f7fafc;
+}
+
+.call-date {
+    font-size: 0.75rem;
+    color: #a0aec0;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+.detail-label {
+    color: #a0aec0;
+}
+
+.detail-value {
+    color: #f7fafc;
+    text-align: right;
+    max-width: 60%;
+    word-break: break-word;
+}
+
+.notes-section {
+    background-color: #1a202c;
+    border-radius: 0.25rem;
+    padding: 0.75rem;
+    margin-top: 1rem;
+}
+
+.notes-header {
+    font-size: 0.75rem;
+    color: #a0aec0;
+    margin-bottom: 0.5rem;
+}
+
+.notes-content {
+    color: #f7fafc;
+    font-size: 0.75rem;
+    max-height: 100px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    line-height: 1.4;
+}
+
+/* Highlight search matches */
+.search-highlight {
+    background-color: rgba(49, 130, 206, 0.3);
+    border-radius: 0.125rem;
+    padding: 0.125rem;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+.time-info {
+    font-size: 0.875rem;
+    color: #a0aec0;
+    margin-top: 5px;
+    font-family: 'Roboto', sans-serif;
+    text-align: left;
 }
