@@ -39,7 +39,7 @@ chrome.action.onClicked.addListener(async (tab) => {
     } else {
       console.log('Opening new tab with HTML document');
       chrome.tabs.create({ 
-        url: 'offscreen.html', 
+        url: '../offscreenview/offscreen.html', 
         active: false, // Open in the background
         index: 0 // Open as the very first tab
       }, (newTab) => {

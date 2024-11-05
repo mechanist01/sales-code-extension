@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;700&display=swap');
 
 body {
-  background-image: url('bg.png');
+  background-image: url('images/bg.png');
   background-size: cover;
   background-position: center;
   color: #f7fafc;

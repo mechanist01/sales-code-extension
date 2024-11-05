@@ -1,4 +1,4 @@
-import { captureTabAudio, startAudioCapture, stopAudioCapture } from './audiocapture.js';
+import { captureTabAudio, startAudioCapture, stopAudioCapture } from '../sidepanel/audiocapture.js';
 import { WordsMerger } from './wordsMerger.js';
 import { DialogueBox } from './dialogueBox.js';
 

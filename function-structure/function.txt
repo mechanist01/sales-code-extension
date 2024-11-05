@@ -1,0 +1,61 @@
+manifest.json
+manifest_version: Specifies the extension’s manifest version (3).
+permissions: Lists permissions required for functionalities like tabCapture, microphone, storage, etc.
+content_scripts: Runs content scripts on specified URLs.
+side_panel: Defines the default path to the side panel HTML.
+sidepanel/sidepanel.js
+displayFailedCallStatus: Updates the UI to show failed call status, allowing the user to retry or delete.
+showUploadLoading: Shows a loading animation during the upload process.
+saveDialogueContent: Saves sticky note or dialogue content into storage.
+saveTranscriptionContent: Saves transcribed content to storage.
+updateDialogueBox: Adds a new message or transcription to the dialogue box UI.
+appendToDialogueBox: Appends a message to the dialogue box.
+startRecording: Initiates recording using selected tab and microphone sources.
+sidepanel/sidepanel.html
+Contains layout and elements for the side panel:
+controls: Holds control buttons for starting/stopping recording.
+dialogueBox: Displays transcription and dialogue.
+uploadButton: Triggers upload.
+failedCallsContainer: Displays failed calls with retry and delete options.
+audiocapture/audiocapture.js
+captureTabAudio: Captures audio from the currently active tab.
+startAudioCapture: Starts the audio capture process, connecting audio nodes for visualization.
+stopAudioCapture: Stops audio capture, closing the audio context.
+visualizeAudio: Dynamically updates a volume bar to reflect live audio input levels.
+audio/audioFile.js
+startRecordingAudioStreams: Records both microphone and tab audio streams.
+stopRecording: Ends the audio recording session.
+createAndDownloadFiles: Converts recorded audio into downloadable files, uploading them to the server.
+handleCall: Manages metadata related to a call and handles upload attempts for failed calls.
+retryFailedCall: Attempts re-upload for a previously failed call.
+deleteFailedCall: Removes failed call data from storage.
+components/livelocaltime.js
+createClockButton: Generates a clock button for accessing time zone information.
+injectTimeZoneWindow: Injects a draggable, resizable window displaying current time zone info and search options.
+utils/wordsMerger.js
+processApiResponse: Merges words from partial and final transcripts to form complete dialogue bubbles.
+updateDialogueBox: Updates the dialogue box with new entries.
+reset: Resets the dialogue and response data.
+utils/dialogueBox.js
+updateDialogueBox: Adds messages to the dialogue box with auto-scroll.
+scrollToBottom: Automatically scrolls the dialogue box to the newest message.
+clearDialogue: Clears all entries in the dialogue box.
+utils/STT.js
+initializeWebSocket: Connects to a WebSocket for streaming transcriptions.
+startTranscription: Begins transcription, setting up audio processing.
+setupAudioProcessing: Processes audio data and streams it to the WebSocket.
+stopTranscription: Ends transcription, disconnecting the WebSocket and resetting the audio context.
+offscreen/offscreenView.js
+formatDate: Formats dates for displaying in call records.
+createCallCard: Generates individual call cards with editing, deleting, and expanding options.
+updateGrid: Updates the call card grid layout according to sorting and filtering options.
+setupSearch: Sets up a search bar for finding specific call data.
+offscreen/offscreen.js
+requestMicrophonePermission: Requests permission to access the microphone, handling UI updates based on the response.
+stickynotes/stickypaste.js
+initializeStickyPaste: Sets up a context menu for pasting sticky note content, managing clipboard actions and user interactions.
+stickynotes/notes.js
+injectStickyNote: Adds a sticky note to the page with pinning, saving, deleting, and resizing options.
+createStickyNote: Creates a sticky note with persistence features, draggable positioning, and resizing.
+injectPenButton: Adds a button to create a sticky note if one is not already on the page.
+updateNoteVisibility: Toggles sticky note visibility based on page origin and persistence settings.

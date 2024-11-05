@@ -1,6 +1,5 @@
 import { startAudioCapture, stopAudioCapture, visualizeAudio, captureTabAudio } from './audiocapture.js';
-import { convertStreamToBase64WebM } from './utils.js';
-import { SpeechToText } from './STT.js';
+import { SpeechToText } from '../STTdialogue/STT.js';
 import { startRecordingAudioStreams, stopRecording, createAndDownloadFiles, handleCall, retryFailedCall, deleteFailedCall } from './audioFile.js';
 import { createSalesForm } from './salesForm.js';
 import { resetAllData } from './totalrecall.js';
@@ -138,6 +137,84 @@ window.addEventListener('failedCallsUpdated', () => {
     displayFailedCallStatus();
 });
 
+function saveDialogueContent(dialogueContent, currentOrigin) {
+    chrome.storage.local.get(['stickyNotes'], (result) => {
+        let stickyNotes = result.stickyNotes || {};
+        const noteData = stickyNotes[currentOrigin];
+        
+        if (noteData) {
+            // Update existing note with dialogue content
+            stickyNotes[currentOrigin] = {
+                ...noteData,
+                dialogueContent: dialogueContent
+            };
+        } else {
+            // Create new note entry with dialogue content
+            stickyNotes[currentOrigin] = {
+                persistentNote: false,
+                content: '',
+                dialogueContent: dialogueContent,
+                position: { x: 0, y: 0 },
+                ownerOrigin: currentOrigin,
+                showOnAllPages: false
+            };
+        }
+
+        chrome.storage.local.set({ stickyNotes }, () => {
+            // Notify other components about the update
+            chrome.runtime.sendMessage({
+                type: 'DIALOGUE_CONTENT_UPDATED',
+                data: {
+                    dialogueContent: dialogueContent,
+                    origin: currentOrigin
+                }
+            });
+        });
+    });
+}
+
+function saveTranscriptionContent(transcriptionContent) {
+    chrome.tabs.query({ active: true, currentWindow: true }, ([activeTab]) => {
+        if (activeTab) {
+            const url = new URL(activeTab.url);
+            const currentOrigin = url.origin;
+            
+            chrome.storage.local.get(['savedCalls'], (result) => {
+                const savedCalls = result.savedCalls || [];
+                
+                // Find the current call for this origin
+                const currentCall = savedCalls.find(call => {
+                    const callUrl = new URL(call.originUrl || window.location.href);
+                    return callUrl.origin === currentOrigin;
+                });
+
+                if (currentCall) {
+                    // Update existing call with transcription
+                    currentCall.transcription = transcriptionContent;
+                } else {
+                    // Create new call entry with transcription
+                    savedCalls.push({
+                        originUrl: currentOrigin,
+                        transcription: transcriptionContent,
+                        date: new Date().toISOString()
+                    });
+                }
+
+                chrome.storage.local.set({ savedCalls }, () => {
+                    // Notify offscreen view about the update
+                    chrome.runtime.sendMessage({
+                        type: 'TRANSCRIPTION_UPDATED',
+                        data: {
+                            transcription: transcriptionContent,
+                            origin: currentOrigin
+                        }
+                    });
+                });
+            });
+        }
+    });
+}
+
 /**
  * Updates the dialogue box with new text.
  * @param {string} text - The text to add to the dialogue box.
@@ -151,14 +228,21 @@ function updateDialogueBox(text, isHTML = false, isSummary = false) {
 
     window.dialogueEntries.push(entry);
     appendToDialogueBox(entry);
+    
+    // Save dialogue entries to local storage
     saveToLocalStorage();
+
+    // Combine all dialogue entries into a single transcription
+    const fullTranscription = window.dialogueEntries
+        .map(entry => entry.text)
+        .join('\n');
+    
+    // Save the transcription
+    saveTranscriptionContent(fullTranscription);
 
     if (isAtBottom) {
         dialogueBox.scrollTop = dialogueBox.scrollHeight;
     }
-
-    console.log('Current dialogue box content size:', dialogueBox.innerHTML.length, 'characters');
-    console.log('Number of entries:', window.dialogueEntries.length);
 }
 
 /**

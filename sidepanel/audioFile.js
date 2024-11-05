@@ -61,14 +61,16 @@ export function createAndDownloadFiles(micChunks, tabChunks, onComplete) {
         })
     ]).then(([micData, tabData]) => {
         // Store the audio data
-        callData.micAudio = micData.base64;
         callData.tabAudio = tabData.base64;
+        callData.micAudio = micData.base64;
+        
 
         const apiFormData = new FormData();
         
         // Add the audio files
-        apiFormData.append('audio1', micData.blob, 'rep.wav');
-        apiFormData.append('audio2', tabData.blob, 'customer.wav');
+        apiFormData.append('audio1', tabData.blob, 'customer.wav');
+        apiFormData.append('audio2', micData.blob, 'rep.wav');
+    
         
         // Add the metadata from handleCall
         apiFormData.append('name', metadata.rep || '');

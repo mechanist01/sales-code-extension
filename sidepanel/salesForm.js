@@ -1,5 +1,5 @@
-import { createAndDownloadFiles } from './audioFile.js';
-import { injectStickyNote } from './notes.js';
+import { createAndDownloadFiles } from '../sidepanel/audioFile.js';
+import { injectStickyNote } from '../notes/notes.js';
 
 export function createSalesForm({ dialogueBox, uploadButton, startButton }, micChunks, tabChunks, handleCall, show = true) {
     console.log('Creating sales form...');

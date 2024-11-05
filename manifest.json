@@ -19,35 +19,35 @@
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
-            "js": ["contentScript.js"]
+            "js": ["utils/contentScript.js"]
         }
     ],
     "web_accessible_resources": [
         {
-            "resources": ["requestPermissions.html", "requestPermissions.js","stickypaste.js"],
+            "resources": ["requestPermissions.html", "requestPermissions.js","notes/stickypaste.js"],
             "matches": ["<all_urls>"]
         },
         {
-            "resources": ["offscreen.html"],
+            "resources": ["offscreenview/offscreen.html"],
             "matches": ["<all_urls>"]
         },
         {
-            "resources": ["notes.js"],
+            "resources": ["notes/notes.js"],
             "matches": ["<all_urls>"]
         }
     ],
     "side_panel": {
-        "default_path": "sidepanel.html"
+        "default_path": "sidepanel/sidepanel.html"
     },
     "background": {
-        "service_worker": "background.js",
+        "service_worker": "utils/background.js",
         "type": "module"
     },
     "action": {},
     "icons": {
-        "16": "icon16.png",
-        "48": "icon48.png",
-        "128": "icon128.png"
+        "16": "images/icon16.png",
+        "48": "images/icon48.png",
+        "128": "images/icon128.png"
     },
     "host_permissions": [
         "<all_urls>"

@@ -288,7 +288,7 @@ function updateNoteVisibility(currentOrigin) {
     });
 }
 
-async function createStickyNote(currentOrigin) {
+function createStickyNote(currentOrigin) {
     if (document.querySelector('.sticky-note')) {
         return;
     }
@@ -776,6 +776,93 @@ async function createStickyNote(currentOrigin) {
         pasteHandler.cleanup();
         stickyNote.remove();
     }
+
+    // Add a new section for dialogue content
+    const dialogueSection = document.createElement('div');
+    dialogueSection.className = 'dialogue-section';
+    dialogueSection.innerHTML = `
+        <div class="dialogue-header">Transcription</div>
+        <div class="dialogue-content"></div>
+    `;
+
+    // Insert dialogue section before or after notes section
+    const notesSection = stickyNote.querySelector('.notes-section');
+    notesSection.parentNode.insertBefore(dialogueSection, notesSection.nextSibling);
+
+    // Load dialogue content from storage
+    chrome.storage.local.get(['stickyNotes'], (result) => {
+        const stickyNotes = result.stickyNotes || {};
+        const noteData = stickyNotes[currentOrigin];
+        
+        if (noteData?.dialogueContent) {
+            const dialogueContent = stickyNote.querySelector('.dialogue-content');
+            dialogueContent.textContent = noteData.dialogueContent;
+        }
+    });
+
+    // Add listener for dialogue content updates
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        if (message.type === 'DIALOGUE_CONTENT_UPDATED' && 
+            message.data.origin === currentOrigin) {
+            const dialogueContent = stickyNote.querySelector('.dialogue-content');
+            if (dialogueContent) {
+                dialogueContent.textContent = message.data.dialogueContent;
+            }
+        }
+    });
+
+    // Add styles for dialogue section
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = `
+        .dialogue-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #1a202c;
+            border-radius: 0.25rem;
+            border: 1px solid #4a5568;
+            margin: 0.875rem;
+            overflow: hidden;
+        }
+
+        .dialogue-header {
+            padding: 0.75rem;
+            border-bottom: 1px solid #4a5568;
+            font-weight: 500;
+            color: #a0aec0;
+            font-size: 0.975rem;
+            background-color: rgba(26, 32, 44, 0.2);
+        }
+
+        .dialogue-content {
+            padding: 0.875rem;
+            overflow-y: auto;
+            flex: 1;
+            font-size: 1.14rem;
+            line-height: 1.5;
+            color: #f7fafc;
+            white-space: pre-wrap;
+        }
+
+        .dialogue-content::-webkit-scrollbar {
+            width: 0.5rem;
+        }
+
+        .dialogue-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.25rem;
+        }
+
+        .dialogue-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 0.25rem;
+        }
+
+        .dialogue-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    `;
+    document.head.appendChild(styleSheet);
 }
 
 // Initialize function to set up note state when page loads

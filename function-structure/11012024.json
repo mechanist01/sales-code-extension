@@ -1,0 +1,151 @@
+{
+    "files": [
+      {
+        "path": "styles.css",
+        "content_summary": ["CSS for main layout, buttons, dialogue box, input container, and visual elements."]
+      },
+      {
+        "path": "manifest.json",
+        "properties": [
+          { "name": "manifest_version", "description": "Defines manifest version for Chrome extension.", "value": 3 },
+          {
+            "name": "permissions",
+            "description": "Required permissions for extension functionality.",
+            "value": ["tabCapture", "activeTab", "storage", "sidePanel", "tabs", "audioCapture", "contentSettings", "microphone", "offscreen", "scripting", "contextMenus"]
+          },
+          {
+            "name": "content_scripts",
+            "description": "Specifies content script to run on all URLs.",
+            "value": [{ "matches": ["<all_urls>"], "js": ["utils/contentScript.js"] }]
+          },
+          { "name": "side_panel", "description": "Path to the side panel HTML.", "value": { "default_path": "sidepanel/sidepanel.html" } }
+        ]
+      },
+      {
+        "path": "sidepanel.js",
+        "functions": [
+          { "name": "displayFailedCallStatus", "description": "Displays failed call status and updates UI with retry and delete options." },
+          { "name": "showUploadLoading", "description": "Displays loading animation during upload." },
+          { "name": "saveDialogueContent", "description": "Saves dialogue content for sticky notes." },
+          { "name": "saveTranscriptionContent", "description": "Saves transcription content to storage." },
+          { "name": "updateDialogueBox", "description": "Updates dialogue box with new text entry." },
+          { "name": "startRecording", "description": "Starts recording with selected tab and microphone." }
+        ]
+      },
+      {
+        "path": "sidepanel.html",
+        "elements": [
+          { "id": "controls", "description": "Container for control elements such as start/stop recording and tab/mic selectors." },
+          { "id": "dialogueBox", "description": "Box for displaying transcription dialogue." },
+          { "id": "uploadButton", "description": "Button to trigger upload." },
+          { "id": "failedCallsContainer", "description": "Container to display failed call status and actions." }
+        ]
+      },
+      {
+        "path": "salesForm.js",
+        "functions": [
+          { "name": "createSalesForm", "description": "Creates a form for sales data input with fields for representative, customer, sale status, and product selection." }
+        ]
+      },
+      {
+        "path": "totalrecall.js",
+        "functions": [
+          { "name": "resetAllData", "description": "Clears all stored data and resets the UI for dialogue and recording status." }
+        ]
+      },
+      {
+        "path": "audiocapture.js",
+        "functions": [
+          { "name": "captureTabAudio", "description": "Captures audio from the current browser tab." },
+          { "name": "startAudioCapture", "description": "Begins audio capture and connects audio nodes for processing." },
+          { "name": "stopAudioCapture", "description": "Stops the audio capture and closes the audio context." },
+          { "name": "visualizeAudio", "description": "Provides real-time audio visualization by updating the width of a volume bar." }
+        ]
+      },
+      {
+        "path": "audioFile.js",
+        "functions": [
+          { "name": "startRecordingAudioStreams", "description": "Starts recording audio from both microphone and tab streams." },
+          { "name": "stopRecording", "description": "Stops recording of audio streams." },
+          { "name": "createAndDownloadFiles", "description": "Converts recorded audio chunks into files, and uploads them to the server." },
+          { "name": "handleCall", "description": "Stores metadata for the current call to handle data uploads and failed calls." },
+          { "name": "retryFailedCall", "description": "Attempts to re-upload failed call data." },
+          { "name": "deleteFailedCall", "description": "Deletes a failed call record from storage." }
+        ]
+      },
+      {
+        "path": "livelocaltime.js",
+        "functions": [
+          { "name": "createClockButton", "description": "Generates a clock button to access time zone functionality." },
+          { "name": "injectTimeZoneWindow", "description": "Injects a draggable and resizable window with time zone information and search functionality." }
+        ]
+      },
+      {
+        "path": "wordsMerger.js",
+        "functions": [
+          { "name": "processApiResponse", "description": "Processes partial and final transcripts to merge words and manage dialogue bubbles." },
+          { "name": "updateDialogueBox", "description": "Updates the dialogue box with current and previous dialogue bubbles." },
+          { "name": "reset", "description": "Resets all tracked data for dialogue and response management." }
+        ]
+      },
+      {
+        "path": "dialogueBox.js",
+        "functions": [
+          { "name": "updateDialogueBox", "description": "Appends text to dialogue box, supporting auto-scroll and character limits." },
+          { "name": "scrollToBottom", "description": "Scrolls the dialogue box to the bottom to show latest message." },
+          { "name": "clearDialogue", "description": "Clears all text in the dialogue box and resets scroll tracking." }
+        ]
+      },
+      {
+        "path": "STT.js",
+        "functions": [
+          { "name": "initializeWebSocket", "description": "Establishes WebSocket connection for streaming transcription." },
+          { "name": "startTranscription", "description": "Starts transcription by connecting to the WebSocket and setting up audio processing." },
+          { "name": "setupAudioProcessing", "description": "Processes audio stream data and sends it to WebSocket for transcription." },
+          { "name": "stopTranscription", "description": "Stops the transcription, closes WebSocket, and resets audio context." }
+        ]
+      },
+      {
+        "path": "offscreenView.js",
+        "functions": [
+          { "name": "formatDate", "description": "Formats dates for display." },
+          { "name": "createCallCard", "description": "Creates call card elements, including edit, delete, and expand functionalities." },
+          { "name": "updateGrid", "description": "Updates the grid layout for call cards based on filters and sorting." },
+          { "name": "setupSearch", "description": "Sets up a search bar for filtering call data." }
+        ]
+      },
+      {
+        "path": "offscreen.html",
+        "elements": [
+          { "class": "filter-bar", "description": "Contains sort and filter options for call cards." },
+          { "id": "callGrid", "description": "Container for dynamically generated call cards." }
+        ]
+      },
+      {
+        "path": "offscreen.js",
+        "functions": [
+          { "name": "requestMicrophonePermission", "description": "Requests microphone access and sends a message based on the result." }
+        ]
+      },
+      {
+        "path": "offscreenStyles.css",
+        "content_summary": ["CSS for offscreen view layout, including card styling, filter bar, and search container."]
+      },
+      {
+        "path": "stickypaste.js",
+        "functions": [
+          { "name": "initializeStickyPaste", "description": "Initializes context menu for pasting note content, manages UI and clipboard actions." }
+        ]
+      },
+      {
+        "path": "notes.js",
+        "functions": [
+          { "name": "injectStickyNote", "description": "Injects a sticky note into the current tab with pin, delete, save, and resize features." },
+          { "name": "createStickyNote", "description": "Creates a sticky note, handling persistent state, drag, and resize functionality." },
+          { "name": "injectPenButton", "description": "Injects a button to create a sticky note if none exists on the page." },
+          { "name": "updateNoteVisibility", "description": "Shows or hides sticky notes based on tab origin and persistence settings." }
+        ]
+      }
+    ]
+  }
+  
